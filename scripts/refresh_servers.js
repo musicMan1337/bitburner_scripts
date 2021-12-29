@@ -1,9 +1,14 @@
 /** @param {import(".").NS} ns */
 export async function main(ns) {
-    //purchase new servers
     let size = 64;
+    let silent = false;
     if (ns.args.length > 0) {
-        size = ns.args[0];
+        [size, silent] = ns.args;
+    }
+
+    if (isNaN(size)) {
+        size = 64;
+        silent = true;
     }
 
     let files = ['weaken.script', 'grow.script', 'hack.script', 'daemon.js'];
@@ -19,9 +24,11 @@ export async function main(ns) {
             ns.print('purchased ' + newHostname);
             ns.tprint('purchased ' + newHostname);
 
-            //start scripts on new server
-            await ns.scp(files, 'home', newHostname);
-            ns.exec('main_hack.js', 'home', 1, newHostname);
+            if (!silent) {
+                //start scripts on new server
+                await ns.scp(files, 'home', newHostname);
+                ns.exec('main_hack.js', 'home', 1, newHostname);
+            }
 
             ++i;
         }
@@ -45,6 +52,11 @@ export async function main(ns) {
         if (ns.args.length > 0) {
             newSize = ns.args[0];
         }
+
+        if (isNaN(newSize)) {
+            newSize = 0;
+        }
+
         if (!newSize) {
             newSize = 2 * size;
         }
@@ -72,9 +84,11 @@ export async function main(ns) {
                 ns.print('purchased ' + newHostname);
                 ns.tprint('purchased ' + newHostname);
 
-                //start scripts on new server
-                await ns.scp(files, 'home', newHostname);
-                ns.exec('main_hack.js', 'home', 1, newHostname);
+                if (!silent) {
+                    //start scripts on new server
+                    await ns.scp(files, 'home', newHostname);
+                    ns.exec('main_hack.js', 'home', 1, newHostname);
+                }
 
                 ++i;
             }

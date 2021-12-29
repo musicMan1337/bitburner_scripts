@@ -5,40 +5,40 @@ export async function main(ns) {
 
     // We will not buy anything if there's less money than this ammount
     let reserveMoney = 1000;
-    let hacknet = ns.hacknet;
+    let HNT = ns.hacknet;
 
     // Buy first HacknetNode if there are none
-    if (hacknet.numNodes() === 0 && ns.getServerMoneyAvailable('home') >= reserveMoney) {
-        hacknet.purchaseNode();
-        ns.print('Purchased ' + hacknet.getNodeStats(hacknet.numNodes() - 1).name + ' because there was none.');
+    if (HNT.numNodes() === 0 && ns.getServerMoneyAvailable('home') >= reserveMoney) {
+        HNT.purchaseNode();
+        ns.print('Purchased ' + HNT.getNodeStats(HNT.numNodes() - 1).name + ' because there was none.');
     }
 
     // If there are no Hacknet Nodes, we can't do anything, so the script ends
     let numUpgrades = 1;
-    while (hacknet.numNodes() > 0) {
+    while (HNT.numNodes() > 0) {
         // If there is not enough money, we wait for it instead of ending
         // the loop.
-        while (ns.getServerMoneyAvailable('home') >= reserveMoney) {
-            for (let i = 0; i < hacknet.numNodes(); i++) {
+        while (ns.getServerMoneyAvailable('home') * 0.1 >= reserveMoney) {
+            for (let i = 0; i < HNT.numNodes(); i++) {
                 while (
-                    hacknet.getLevelUpgradeCost(i, numUpgrades) < ns.getServerMoneyAvailable('home') * 0.1 &&
-                    hacknet.upgradeLevel(i, numUpgrades)
+                    HNT.getLevelUpgradeCost(i, numUpgrades) < ns.getServerMoneyAvailable('home') * 0.1 &&
+                    HNT.upgradeLevel(i, numUpgrades)
                 ) {
-                    ns.print('Upgraded ' + hacknet.getNodeStats(i).name + ' to level ' + hacknet.getNodeStats(i).level);
+                    ns.print('Upgraded ' + HNT.getNodeStats(i).name + ' to level ' + HNT.getNodeStats(i).level);
                 }
 
                 while (
-                    hacknet.getRamUpgradeCost(i, numUpgrades) < ns.getServerMoneyAvailable('home') * 0.1 &&
-                    hacknet.upgradeRam(i, numUpgrades)
+                    HNT.getRamUpgradeCost(i, numUpgrades) < ns.getServerMoneyAvailable('home') * 0.1 &&
+                    HNT.upgradeRam(i, numUpgrades)
                 ) {
-                    ns.print('Upgraded ' + hacknet.getNodeStats(i).name + ' RAM to ' + hacknet.getNodeStats(i).ram);
+                    ns.print('Upgraded ' + HNT.getNodeStats(i).name + ' RAM to ' + HNT.getNodeStats(i).ram);
                 }
 
                 while (
-                    hacknet.getCoreUpgradeCost(i, numUpgrades) < ns.getServerMoneyAvailable('home') * 0.1 &&
-                    hacknet.upgradeCore(i, numUpgrades)
+                    HNT.getCoreUpgradeCost(i, numUpgrades) < ns.getServerMoneyAvailable('home') * 0.1 &&
+                    HNT.upgradeCore(i, numUpgrades)
                 ) {
-                    ns.print('Upgraded ' + hacknet.getNodeStats(i).name + ' core to ' + hacknet.getNodeStats(i).core);
+                    ns.print('Upgraded ' + HNT.getNodeStats(i).name + ' core to ' + HNT.getNodeStats(i).core);
                 }
             }
 
@@ -47,30 +47,28 @@ export async function main(ns) {
             // upgraded and the others don't, the loop above will still
             // attempt to upgrade them all.
             if (
-                hacknet.getLevelUpgradeCost(hacknet.numNodes() - 1, numUpgrades) === Infinity &&
-                hacknet.getRamUpgradeCost(hacknet.numNodes() - 1, numUpgrades) === Infinity &&
-                hacknet.getCoreUpgradeCost(hacknet.numNodes() - 1, numUpgrades) === Infinity &&
-                hacknet.getPurchaseNodeCost() < ns.getServerMoneyAvailable('home') * 0.1
+                HNT.getLevelUpgradeCost(HNT.numNodes() - 1, numUpgrades) === Infinity &&
+                HNT.getRamUpgradeCost(HNT.numNodes() - 1, numUpgrades) === Infinity &&
+                HNT.getCoreUpgradeCost(HNT.numNodes() - 1, numUpgrades) === Infinity &&
+                HNT.getPurchaseNodeCost() < ns.getServerMoneyAvailable('home') * 0.1
             ) {
-                hacknet.purchaseNode();
+                HNT.purchaseNode();
                 ns.print(
                     `Purchased ${
-                        hacknet.getNodeStats(hacknet.numNodes() - 1).name
+                        HNT.getNodeStats(HNT.numNodes() - 1).name
                     } because the last one couldn't be upgraded further.`
                 );
             } else if (
                 // Or buy the next Hacknet Node if the next upgrade is more
                 // expensive than buying a new Hacknet Node.
-                hacknet.getLevelUpgradeCost(hacknet.numNodes() - 1, numUpgrades) > hacknet.getPurchaseNodeCost() &&
-                hacknet.getRamUpgradeCost(hacknet.numNodes() - 1, numUpgrades) > hacknet.getPurchaseNodeCost() &&
-                hacknet.getCoreUpgradeCost(hacknet.numNodes() - 1, numUpgrades) > hacknet.getPurchaseNodeCost() &&
-                hacknet.getPurchaseNodeCost() < ns.getServerMoneyAvailable('home') * 0.1
+                HNT.getLevelUpgradeCost(HNT.numNodes() - 1, numUpgrades) > HNT.getPurchaseNodeCost() &&
+                HNT.getRamUpgradeCost(HNT.numNodes() - 1, numUpgrades) > HNT.getPurchaseNodeCost() &&
+                HNT.getCoreUpgradeCost(HNT.numNodes() - 1, numUpgrades) > HNT.getPurchaseNodeCost() &&
+                HNT.getPurchaseNodeCost() < ns.getServerMoneyAvailable('home') * 0.1
             ) {
-                hacknet.purchaseNode();
+                HNT.purchaseNode();
                 ns.print(
-                    `Purchased ${
-                        hacknet.getNodeStats(hacknet.numNodes() - 1).name
-                    } because it was cheaper than next upgrade.`
+                    `Purchased ${HNT.getNodeStats(HNT.numNodes() - 1).name} because it was cheaper than next upgrade.`
                 );
             }
 

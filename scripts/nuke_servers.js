@@ -2,12 +2,6 @@
 export async function main(ns) {
     ns.disableLog('ALL');
 
-    let pserv = false;
-    let targetLimit = 0;
-    if (ns.args.length) {
-        [pserv, targetLimit] = ns.args;
-    }
-
     let purchased = ns.getPurchasedServers();
 
     function __readNodes__(fPath) {
@@ -89,65 +83,13 @@ export async function main(ns) {
                     }
                 });
                 ns.nuke(node);
+                ns.tprint(`NUKE: ${node}`)
             }
         });
     }
 
-    async function __scanAndWriteRootedNodes__() {
-        let nodes = __readNodes__('nodes.txt');
-        let rooted = nodes.reduce((arr, node) => {
-            //don't hack ourselves
-            if (ns.hasRootAccess(node) && node !== 'home' && !purchased.includes(node)) {
-                let maxMoney = ns.getServerMaxMoney(node);
-
-                arr.push(`${maxMoney} ${node}`);
-            }
-            return arr;
-        }, []);
-
-        //lowest max money at the front, filter invalid servers, remove money from name
-        rooted.sort((a, b) => +b.split(' ')[0] - +a.split(' ')[0]);
-        rooted = rooted.filter((node) => +node.split(' ')[0] > 0);
-        await ns.write('money_rooted.txt', rooted, 'w');
-
-        rooted = rooted.map((node) => node.split(' ')[1]);
-
-        if (targetLimit && targetLimit != 'All') {
-            rooted = rooted.slice(rooted.length - targetLimit);
-        }
-
-        ns.tprint(`hackable nodes: ${rooted.length}`);
-        await ns.write('rooted.txt', rooted, 'w');
-    }
 
     //read the nodes
     await __scanAndWriteAllNodes__();
     __nukeAvailableNodes__();
-    await __scanAndWriteRootedNodes__();
-
-    //load nodes
-    let attackNodes = [];
-    if (pserv) {
-        attackNodes = purchased;
-    } else {
-        attackNodes = __readNodes__('rooted.txt');
-        if (purchased.length) {
-            attackNodes = attackNodes.concat(purchased);
-        }
-    }
-
-    attackNodes.push('home');
-    ns.scriptKill('daemon.js', 'home');
-    ns.scriptKill('daemon_fml.js', 'home');
-
-    // spin up attack servers
-    if (ns.getServerMaxRam('home') - ns.getServerUsedRam('home') > ns.getScriptRam('main_hack.js') * attackNodes.length)
-        attackNodes.forEach((attacker) => {
-            ns.exec('main_hack.js', 'home', 1, attacker, pserv || false, targetLimit || '');
-        });
-    else
-        for (let i = 0; i < attackNodes.length; i++) {
-            await ns.sleep(200);
-            ns.exec('main_hack.js', 'home', 1, attackNodes[i], pserv || false, targetLimit || '');
-        }
 }

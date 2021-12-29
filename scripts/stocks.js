@@ -1,109 +1,133 @@
+/**
+ * @typedef {{
+ *  sym: string;
+ *  shares: number;
+ *  price: number;
+ *  forecast: number;
+ * }[]} Stocks
+ *
+ * @typedef {{
+ *  [sym: string]: {
+ *      profit: string;
+ *      raw: number;
+ *  }
+ * }} Tracker
+ */
+
+/** @type {Stocks} */
+let stocks = [];
+/** @type {Stocks} */
+let myStocks = [];
+let corpus = 0;
+
+/** @type {Tracker} */
+let profitTracker = {};
+
+let COMMISSION = 100000; //Buy or sell commission
+let numCycles = 2; //Each cycle is ~ 5 seconds
+let fracL = 0.2; //Fraction of assets to keep as cash in hand
+let fracH = 0.2;
+
 /** @param {import(".").NS} ns */
 export async function main(ns) {
     ns.disableLog('ALL');
+    ns.tail();
 
     let TIX = ns.stock;
-
-    let fracL = 0.1; //Fraction of assets to keep as cash in hand
-    let fracH = 0.2;
-    let commission = 100000; //Buy or sell commission
-    let numCycles = 2; //Each cycle is 6 seconds
-
-    let stocks = [];
-    let myStocks = [];
-    let corpus = 0;
+    let syms = TIX.getSymbols();
+    syms.forEach((sym) => (profitTracker[sym] = { profit: '$0.00', raw: 0 }));
 
     function __refresh__() {
         let newCorpus = ns.getServerMoneyAvailable('home');
 
+        stocks = [];
         myStocks = [];
-        for (let i = 0; i < stocks.length; i++) {
-            let sym = stocks[i].sym;
-            let [shares, avgPx, _sharesShort, _avgPxShort] = TIX.getPosition(sym);
+        syms.forEach((sym) => {
+            let [shares] = TIX.getPosition(sym);
+            let price = TIX.getPrice(sym);
+            let forecast = TIX.getForecast(sym);
+            newCorpus += price * shares;
 
-            stocks[i].price = TIX.getPrice(sym);
-            stocks[i].shares = shares;
-            stocks[i].buyPrice = avgPx;
-            stocks[i].vol = TIX.getVolatility(sym);
-            stocks[i].prob = 2 * (TIX.getForecast(sym) - 0.5);
-            stocks[i].expRet = (stocks[i].vol * stocks[i].prob) / 2;
-
-            newCorpus += stocks[i].price * stocks[i].shares;
-
-            if (stocks[i].shares > 0) {
-                myStocks.push(stocks[i]);
+            if (shares) {
+                myStocks.push({ sym, shares, price, forecast });
+            } else {
+                stocks.push({ sym, shares, price, forecast });
             }
-        }
+        });
 
-        stocks.sort((a, b) => b.expRet - a.expRet);
+        stocks.sort((a, b) => b.forecast - a.forecast);
         corpus = newCorpus;
     }
 
     function __format__(profit) {
-        let symbols = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc'];
-        let formatProfit;
-
-        let i;
-        if (profit >= 0) {
-            for (i = 0; profit >= 1000 && i < symbols.length; i++) {
-                profit /= 1000;
-            }
-            formatProfit = `$${profit.toFixed(3)}${symbols[i]}`;
-        } else {
-            for (i = 0; profit <= -1000 && i < symbols.length; i++) {
-                profit /= 1000;
-            }
-            formatProfit = `-$${profit.toFixed(3) * -1}${symbols[i]}`;
-        }
-
-        return formatProfit;
+        return ns.nFormat(profit, '($0.00a)');
     }
 
     function __buy__(stock, numShares) {
-        TIX.buy(stock.sym, numShares);
-        ns.print(`Bought ${stock.sym} for ${__format__(numShares * stock.price)}`);
+        //buy
+        let pricePer = TIX.buy(stock.sym, numShares);
+        let price = __format__(pricePer * numShares + COMMISSION);
+
+        //track
+        profitTracker[stock.sym].raw = profitTracker[stock.sym].raw - pricePer * numShares;
+        profitTracker[stock.sym].profit = __format__(profitTracker[stock.sym].raw);
+
+        //log
+        ns.print(`Bought ${pricePer ? numShares : 0} shares of ${stock.sym} for ${price}`);
+        ns.print(`Current profit for ${stock.sym}: ${profitTracker[stock.sym].profit}`);
     }
 
     function __sell__(stock, numShares) {
-        let profit = numShares * (stock.price - stock.buyPrice) - 2 * commission;
-        ns.print(`Sold ${stock.sym} for profit of ${__format__(profit)}`);
-        TIX.sell(stock.sym, numShares);
-    }
+        //buy
+        let profitPer = TIX.sell(stock.sym, numShares);
+        let profit = __format__(profitPer * numShares + COMMISSION);
 
-    let syms = TIX.getSymbols();
-    syms.forEach((sym) => {
-        stocks.push({ sym });
-    });
+        //track
+        profitTracker[stock.sym].raw = profitTracker[stock.sym].raw + profitPer * numShares;
+        profitTracker[stock.sym].profit = __format__(profitTracker[stock.sym].raw);
+
+        //log
+        ns.print(`Sold ${profitPer ? numShares : 0} shares of ${stock.sym} for ${profit}`);
+        ns.print(`Current profit for ${stock.sym}: ${profitTracker[stock.sym].profit}`);
+    }
 
     while (true) {
         __refresh__();
 
         //Sell underperforming shares
         myStocks.forEach((stock) => {
-            if (stocks[0].expRet > stock.expRet) {
+            if (stock.forecast < stocks[0].forecast) {
                 __sell__(stock, stock.shares);
-                corpus -= commission;
+                corpus -= COMMISSION;
             }
         });
 
         //Sell shares if not enough cash in hand
         myStocks.forEach((stock) => {
             if (ns.getServerMoneyAvailable('home') < fracL * corpus) {
-                let cashNeeded = corpus * fracH - ns.getServerMoneyAvailable('home') + commission;
+                let cashNeeded = corpus * fracH - ns.getServerMoneyAvailable('home') + COMMISSION;
                 let numShares = Math.floor(cashNeeded / stock.price);
 
                 __sell__(stock, numShares);
-                corpus -= commission;
+                corpus -= COMMISSION;
             }
         });
 
-        //Buy shares with cash remaining in hand
+        // Buy shares with cash remaining in hand
         let cashToSpend = ns.getServerMoneyAvailable('home') - fracH * corpus;
-        let numShares = Math.floor((cashToSpend - commission) / stocks[0].price);
-        if (numShares * stocks[0].expRet * stocks[0].price * numCycles > commission) {
+        let numShares = Math.floor((cashToSpend - COMMISSION) / stocks[0].price);
+        let maxShares = TIX.getMaxShares(stocks[0].sym) - stocks[0].shares;
+
+        numShares = Math.min(numShares, maxShares);
+
+        ns.print('stocks[0].price: ' + stocks[0].price);
+        ns.print('corpus: ' + corpus);
+        ns.print('cashToSpend: ' + cashToSpend);
+
+        if (numShares * stocks[0].forecast * stocks[0].price * numCycles > COMMISSION) {
             __buy__(stocks[0], numShares);
         }
 
-        await ns.sleep(6 * 1000 * numCycles + 200);
+        await ns.sleep(5 * 1000 * numCycles + 200);
     }
 }
