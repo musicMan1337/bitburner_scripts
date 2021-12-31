@@ -1,42 +1,43 @@
 {
     "home": {
         "n00dles - $1.75m - 1": {
-            "nectar-net - $68.75m - 20": {
-                "neo-net - $125.00m - 50": {
-                    "the-hub - $4.85b - 323": {
-                        "rothman-uni - $4.41b - 397": {
-                            "alpha-ent - $17.56b - 510": { "aerocorp - $26.21b - 907": {} }
-                        },
-                        "zb-institute - $25.36b - 758": {},
-                        "summit-uni - $6.59b - 464": {}
-                    },
-                    "netlink - $6.88b - 407": {
-                        "syscore - $10.41b - 635": { "lexo-corp - $18.19b - 677": {} },
-                        "catalyst - $8.85b - 418": {},
-                        "I.I.I.I - $0.00 - 362": {
-                            "rho-construction - $16.33b - 482": {
-                                "global-pharm - $41.06b - 814": {
-                                    "unitalife - $25.81b - 778": {
-                                        "defcomm - $20.75b - 892": {},
-                                        "solaris - $18.36b - 779": { "zb-def - $26.44b - 778": {} }
-                                    }
-                                }
-                            },
-                            "aevum-police - $6.03b - 411": {
-                                "snap-fitness - $11.25b - 727": {
-                                    "deltaone - $36.21b - 896": {
-                                        "univ-energy - $28.36b - 819": {
-                                            "taiyang-digital - $20.05b - 856": {
-                                                "titan-labs - $21.11b - 849": {},
-                                                "microdyne - $15.38b - 825": {
-                                                    "vitalife - $17.98b - 874": {
-                                                        "omnitek - $383.09b - 1016": {},
-                                                        "4sigma - $560.28b - 1052": {
-                                                            "b-and-a - $665.40b - 960": {
-                                                                "megacorp - $1.03t - 1237": {}
+            "max-hardware - $250.00m - 80": {
+                "silver-helix - $1.13b - 150": {
+                    "comptek - $5.55b - 312": {
+                        "catalyst - $8.44b - 411": {
+                            "lexo-corp - $17.71b - 664": {
+                                "aerocorp - $26.96b - 864": {
+                                    "deltaone - $40.90b - 819": {
+                                        "zeus-med - $33.71b - 817": {
+                                            "zb-def - $23.23b - 782": {},
+                                            "nova-med - $29.11b - 806": {
+                                                "titan-labs - $20.03b - 843": {},
+                                                "applied-energetics - $20.41b - 793": {
+                                                    "fulcrumtech - $39.14b - 973": {},
+                                                    "stormtech - $28.32b - 998": {
+                                                        "kuai-gong - $701.31b - 1217": {}
+                                                    },
+                                                    "helios - $15.91b - 838": {
+                                                        "4sigma - $379.84b - 1244": {}
+                                                    },
+                                                    "vitalife - $19.40b - 870": {
+                                                        "omnitek - $334.29b - 938": {
+                                                            "b-and-a - $557.96b - 947": {
+                                                                "ecorp - $1.57t - 1156": {}
                                                             },
-                                                            "blade - $264.07b - 1198": {},
-                                                            "clarkinc - $429.08b - 1061": {}
+                                                            "blade - $989.52b - 990": {
+                                                                "megacorp - $1.14t - 1251": {},
+                                                                "The-Cave - $0.00 - 925": {
+                                                                    "w0r1d_d43m0n - $0.00 - 3000": {}
+                                                                }
+                                                            },
+                                                            "clarkinc - $574.84b - 1196": {}
+                                                        },
+                                                        ". - $0.00 - 550": {
+                                                            "nwo - $503.91b - 971": {},
+                                                            "powerhouse-fitness - $22.50b - 978": {
+                                                                "fulcrumassets - $25.00m - 1494": {}
+                                                            }
                                                         }
                                                     }
                                                 }
@@ -44,58 +45,74 @@
                                         }
                                     }
                                 }
-                            },
-                            "millenium-fitness - $6.25b - 480": {
-                                "galactic-cyber - $18.92b - 857": {
-                                    "omnia - $23.20b - 876": {
-                                        "icarus - $24.86b - 862": {},
-                                        "zeus-med - $37.45b - 841": {
-                                            "infocomm - $22.31b - 926": {
-                                                "applied-energetics - $23.90b - 815": {},
-                                                "run4theh111z - $0.00 - 530": {
-                                                    "fulcrumtech - $37.86b - 1084": {},
-                                                    "stormtech - $25.61b - 1067": {
-                                                        "kuai-gong - $705.06b - 1106": {
-                                                            "nwo - $669.73b - 1077": {
-                                                                "fulcrumassets - $25.00m - 1584": {}
-                                                            }
-                                                        },
-                                                        ". - $0.00 - 515": {
-                                                            "powerhouse-fitness - $22.50b - 1091": {
-                                                                "ecorp - $1.05t - 1368": {},
-                                                                "The-Cave - $0.00 - 925": {
-                                                                    "w0r1d_d43m0n - $0.00 - 3000": {}
-                                                                }
-                                                            }
-                                                        }
-                                                    },
-                                                    "helios - $15.45b - 889": {}
-                                                }
-                                            },
-                                            "nova-med - $30.31b - 786": {}
+                            }
+                        }
+                    },
+                    "netlink - $6.88b - 377": {
+                        "rothman-uni - $5.04b - 419": {
+                            "aevum-police - $7.90b - 421": {
+                                "snap-fitness - $11.25b - 749": {}
+                            }
+                        },
+                        "I.I.I.I - $0.00 - 354": {}
+                    },
+                    "johnson-ortho - $1.76b - 296": {
+                        "zb-institute - $25.53b - 734": {
+                            "rho-construction - $15.40b - 523": {},
+                            "millenium-fitness - $6.25b - 513": {
+                                "galactic-cyber - $19.16b - 830": {
+                                    "unitalife - $27.14b - 803": {
+                                        "univ-energy - $27.84b - 888": {
+                                            "infocomm - $20.13b - 882": {
+                                                "microdyne - $15.11b - 809": {}
+                                            }
+                                        }
+                                    }
+                                },
+                                "global-pharm - $38.20b - 833": {
+                                    "omnia - $23.63b - 867": {
+                                        "defcomm - $23.44b - 933": {},
+                                        "icarus - $23.46b - 905": {},
+                                        "solaris - $21.33b - 825": {
+                                            "taiyang-digital - $20.50b - 855": {
+                                                "run4theh111z - $0.00 - 530": {}
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
                     },
-                    "johnson-ortho - $1.78b - 298": {}
+                    "avmnite-02h - $0.00 - 213": {
+                        "summit-uni - $5.82b - 444": {}
+                    }
                 },
+                "omega-net - $1.55b - 215": {
+                    "crush-fitness - $1.40b - 236": {
+                        "syscore - $12.19b - 575": {
+                            "alpha-ent - $15.43b - 521": {}
+                        }
+                    }
+                }
+            },
+            "CSEC - $0.00 - 56": {
+                "neo-net - $125.00m - 50": {
+                    "the-hub - $4.55b - 286": {}
+                }
+            }
+        },
+        "foodnstuff - $50.00m - 1": {
+            "zer0 - $187.50m - 75": {}
+        },
+        "sigma-cosmetics - $57.50m - 5": {},
+        "joesguns - $62.50m - 10": {},
+        "hong-fang-tea - $75.00m - 30": {},
+        "harakiri-sushi - $100.00m - 40": {},
+        "iron-gym - $500.00m - 100": {
+            "nectar-net - $68.75m - 20": {
                 "phantasy - $600.00m - 100": {}
             }
         },
-        "foodnstuff - $50.00m - 1": {},
-        "sigma-cosmetics - $57.50m - 5": {},
-        "joesguns - $62.50m - 10": {
-            "max-hardware - $250.00m - 80": { "silver-helix - $1.13b - 150": { "comptek - $6.25b - 372": {} } }
-        },
-        "hong-fang-tea - $75.00m - 30": {},
-        "harakiri-sushi - $100.00m - 40": {
-            "CSEC - $0.00 - 56": {
-                "omega-net - $1.71b - 206": { "crush-fitness - $1.05b - 247": {}, "avmnite-02h - $0.00 - 202": {} }
-            }
-        },
-        "iron-gym - $500.00m - 100": { "zer0 - $187.50m - 75": {} },
         "darkweb - $0.00 - 1": {}
     }
 }
