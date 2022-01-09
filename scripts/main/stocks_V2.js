@@ -105,9 +105,6 @@ export async function main(ns) {
             }
         });
 
-        // Don't do this. Use getStockPurchaseCost for some proportion of corpus,
-        // then reduce it by a certain % until it's buyable.
-
         let stockIndex = -1;
         let cashToSpend = ns.getServerMoneyAvailable('home');
         while (cashToSpend > 100 * COMMISSION && cashToSpend > corpus * 0.1) {
@@ -120,24 +117,24 @@ export async function main(ns) {
                 break;
             }
 
-            let availibleShares = TIX.getMaxShares(stockToBuy.sym) - stockToBuy.shares;
-            if (!availibleShares) {
+            let availableShares = TIX.getMaxShares(stockToBuy.sym) - stockToBuy.shares;
+            if (!availableShares) {
                 // We bought all shares of this stock
                 continue;
             }
 
-            while (availibleShares) {
-                let purchaseCost = TIX.getPurchaseCost(stockToBuy.sym, availibleShares, 'Long');
+            while (availableShares) {
+                let purchaseCost = TIX.getPurchaseCost(stockToBuy.sym, availableShares, 'Long');
                 if (purchaseCost <= cashToSpend) {
-                    __buy__(stockToBuy, availibleShares);
+                    __buy__(stockToBuy, availableShares);
                     cashToSpend -= purchaseCost;
                     break;
                 }
 
-                availibleShares = Math.floor(availibleShares * 0.9);
+                availableShares = Math.floor(availableShares * 0.9);
             }
         }
 
-        await ns.sleep(6 * 1000);
+        await ns.sleep(5 * 1000);
     }
 }

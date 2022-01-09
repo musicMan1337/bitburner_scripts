@@ -5,9 +5,6 @@ export async function main(ns) {
     let [TARGET, HOST, DAEMON_RAM, limit] = ns.args;
     let IS_PSERV = HOST.split('-')[0] === 'pserv';
 
-    let FML = ns.formulas;
-
-    let maxRam = ns.getServerMaxRam(HOST);
     let maxMoney = ns.getServerMaxMoney(TARGET);
     let minSecurity = ns.getServerMinSecurityLevel(TARGET);
 
@@ -15,12 +12,9 @@ export async function main(ns) {
     let growRam = ns.getScriptRam('grow.script');
     let hackRam = ns.getScriptRam('hack.script');
 
-    function __ramCheck__(host, amt) {
-        let used = ns.getServerUsedRam(host);
-        let free = maxRam - used;
-
-        ns.print(`'Free RAM: ${free} - Amt: ${amt}`);
-        return free > amt;
+    function __ramCheck__(amt) {
+        ns.print(`Free RAM: ${DAEMON_RAM} - Amt: ${amt}`);
+        return DAEMON_RAM > amt;
     }
 
     function __nodeStatus__(target) {
@@ -43,7 +37,7 @@ export async function main(ns) {
     function __getOptimalWeakenThreads__() {
         let securityTillMin = ns.getServerSecurityLevel(TARGET) - minSecurity;
         let weakenT = Math.ceil(securityTillMin / 0.05);
-        let maxT = Math.floor((maxRam - ns.getServerUsedRam(HOST)) / weakenRam);
+        let maxT = Math.floor(DAEMON_RAM / weakenRam);
 
         if (IS_PSERV) {
             weakenT = Math.ceil(weakenT / (limit ? 5 : 25));
@@ -52,51 +46,9 @@ export async function main(ns) {
         return Math.min(weakenT, maxT);
     }
 
-    function __getOptimalGrowThreads__(hackT) {
-        let currMoney, moneyTillMax, hackPct;
-
-        if (hackT) {
-            hackPct = FML.hacking.hackPercent(ns.getServer(TARGET), ns.getPlayer()) * 100 * hackT;
-            moneyTillMax = hackPct + maxMoney;
-        } else {
-            currMoney = ns.getServerMoneyAvailable(TARGET);
-            moneyTillMax = maxMoney - currMoney;
-        }
-
-        let growPct = FML.hacking.growPercent(ns.getServer(TARGET), 1, ns.getPlayer(), ns.getServer(HOST).cpuCores) - 1;
-        let pctNeeded = moneyTillMax / maxMoney;
-
-        let growT = Math.ceil(pctNeeded / growPct);
-        let maxT = Math.floor((maxRam - ns.getServerUsedRam(HOST)) / growRam);
-
-        ns.print(growT);
-        ns.print(maxT);
-
-        if (IS_PSERV) {
-            growT = Math.ceil(growT / (limit ? 5 : 25));
-        }
-
-        return Math.min(growT, maxT);
-    }
-
-    function __getOptimalHackThreads__() {
-        let moneyThreshold = maxMoney * 0.6;
-        let hackPct = FML.hacking.hackPercent(ns.getServer(TARGET), ns.getPlayer()) * 100;
-        let hackMoneyPerT = ns.getServerMoneyAvailable(TARGET) * hackPct;
-
-        let hackT = Math.ceil(moneyThreshold / hackMoneyPerT);
-        let maxT = Math.floor((maxRam - ns.getServerUsedRam(HOST)) / hackRam);
-
-        if (IS_PSERV) {
-            hackT = Math.ceil(hackT / (limit ? 5 : 25));
-        }
-
-        return Math.min(hackT, maxT);
-    }
-
     function __calcWeakenThreads__() {
         let weakenT = __getOptimalWeakenThreads__();
-        while (!__ramCheck__(HOST, weakenT * weakenRam) && weakenT > 1) {
+        while (!__ramCheck__(weakenT * weakenRam) && weakenT > 1) {
             weakenT -= IS_PSERV ? 10 : 1;
         }
 
@@ -115,14 +67,16 @@ export async function main(ns) {
         let weakenTR = weakenT * weakenRam;
         let growTR = growT * growRam;
 
-        growT = __getOptimalGrowThreads__();
-        weakened = growT * 0.004;
-        weakenT = Math.ceil(weakened / 0.05);
+        while (weakenTR + growTR < DAEMON_RAM) {
+            growT++;
+            weakened = growT * 0.004;
+            weakenT = Math.ceil(weakened / 0.05);
 
-        weakenTR = weakenT * weakenRam;
-        growTR = growT * growRam;
+            weakenTR = weakenT * weakenRam;
+            growTR = growT * growRam;
+        }
 
-        while (!__ramCheck__(HOST, weakenTR + growTR) && growT > 1) {
+        while (!__ramCheck__(weakenTR + growTR) && growT > 1) {
             growT -= IS_PSERV ? 10 : 1;
             weakened = growT * 0.004;
             weakenT = Math.ceil(weakened / 0.05);
@@ -150,27 +104,25 @@ export async function main(ns) {
         let weakenTR = weakenT * weakenRam;
         let growTR = growT * growRam;
         let hackTR = hackT * hackRam;
+        let hackMoneyPct = 0;
         let weakened = 0;
 
-        hackT = __getOptimalHackThreads__();
-        growT = __getOptimalGrowThreads__(hackT);
+        while (weakenTR + growTR + hackTR < DAEMON_RAM) {
+            hackT++;
 
-        weakened = hackT * 0.002 + growT * 0.004;
-        weakenT = Math.ceil(weakened / 0.05);
-
-        weakenTR = weakenT * weakenRam;
-        growTR = growT * growRam;
-        hackTR = hackT * hackRam;
-
-        while (!__ramCheck__(HOST, weakenTR + growTR + hackTR) && hackT > 1) {
-            hackT -= IS_PSERV ? 10 : 1;
-            growT = __getOptimalGrowThreads__(hackT);
+            hackMoneyPct = ns.hackAnalyze(TARGET) * hackT;
+            growT = Math.ceil(ns.growthAnalyze(TARGET, 1) * hackMoneyPct);
 
             weakened = hackT * 0.002 + growT * 0.004;
             weakenT = Math.ceil(weakened / 0.05);
 
             weakenTR = weakenT * weakenRam;
             growTR = growT * growRam;
+            hackTR = hackT * hackRam;
+        }
+
+        while (!__ramCheck__(weakenTR + growTR + hackTR) && hackT > 1) {
+            hackT -= IS_PSERV ? 10 : 1;
             hackTR = hackT * hackRam;
         }
 
@@ -194,7 +146,7 @@ export async function main(ns) {
         ns.print('---');
         ns.print('');
 
-        let preSec = ns.getServerSecurityLevel(TARGET);
+        let preSec = ns.nFormat(ns.getServerSecurityLevel(TARGET), '0.000');
         let preMoney = ns.getServerMoneyAvailable(TARGET);
 
         while (ns.isRunning('weaken.script', HOST, TARGET)) {
@@ -205,19 +157,19 @@ export async function main(ns) {
         let postMoney = ns.getServerMoneyAvailable(TARGET);
 
         if (preSec < postSec) {
-            ns.print(`Security increased by ${postSec - preSec}`);
+            ns.print(`Security increased by ${ns.nFormat(postSec - preSec, '0.000')}`);
         }
 
         if (preSec > postSec) {
-            ns.print(`Security decreased by ${preSec - postSec}`);
+            ns.print(`Security decreased by ${ns.nFormat(preSec - postSec, '0.000')}`);
         }
 
         if (preMoney < postMoney) {
-            ns.print(`Money increased by ${ns.nFormat(postMoney - preMoney, '$0.00a')}`);
+            ns.print(`Money increased by ${ns.nFormat(postMoney - preMoney, '$0.000a')}`);
         }
 
         if (preMoney > postMoney) {
-            ns.print(`Money decreased by ${ns.nFormat(preMoney - postMoney, '$0.00a')}`);
+            ns.print(`Money decreased by ${ns.nFormat(preMoney - postMoney, '$0.000a')}`);
         }
 
         let weakenT, growT, hackT;
