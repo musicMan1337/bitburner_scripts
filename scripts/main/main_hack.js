@@ -44,8 +44,11 @@ export async function main(ns) {
     //prep attackServer
     let files = ['weaken.script', 'grow.script', 'hack.script', 'daemon.js', 'daemon_fml.js'];
     await ns.scp(files, 'home', ATTACK_SERVER);
-    ns.scriptKill('daemon.js', ATTACK_SERVER);
-    ns.scriptKill('daemon_fml.js', ATTACK_SERVER);
+
+    let scripts = ['daemon.js', 'daemon_fml.js', 'hack.script', 'weaken.script', 'grow.script'];
+    scripts.forEach((script) => {
+        ns.scriptKill(script, ATTACK_SERVER);
+    });
 
     //load nodes
     let targetNodes = __findAttackableNodes__();
